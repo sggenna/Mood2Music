@@ -46,41 +46,39 @@ df = df[['text', 'Genre', 'Tempo', 'emotion']].dropna()
 # Vectorizing the lyrics
 
 # %%
-df_sample['vec'] = df_sample['text'].apply(lambda doc: nlp(doc).vector)
+df['vec'] = df['text'].apply(lambda doc: nlp(doc).vector)
 
 # %% [markdown]
 # Feature matrix with vectorized values
 
 # %%
-X_lyrics = np.vstack(df_sample['vec'].values)
+lyrics = np.array([np.array(vec) for vec in df['vec']])
 
 # %% [markdown]
 # Encode genres
 
 # %%
-ohe = OneHotEncoder()
-genre = ohe.fit_transform(df_sample[['Genre']])
+ohe = OneHotEncoder(sparse_output=False)
+genre = ohe.fit_transform(df[['Genre']])
+
+# %% [markdown]
+# Reshape the tempo into a 2D array to feed into model
 
 # %%
-tempo = csr_matrix(df_sample[['Tempo']].values)
+tempo = df['Tempo'].values.reshape(-1,1)
 
 # %%
-combined = hstack([csr_matrix(X_lyrics), X_genre, X_tempo])
+print(type(genre))
 
+# %%
+combine_features = np.hstack([lyrics,genre,tempo])
 
 # %% [markdown]
 # split to train
 
 # %%
-y = df_sample['emotion']
-X_train, X_test, y_train, y_test = train_test_split(combined, y, test_size=0.2, random_state=42)
-
-# %% [markdown]
-# try logistic regression
-
-# %%
-model = LogisticRegression(max_iter=1000)
-model.fit(X_train, y_train)
+y = df['emotion']
+X_train, X_test, y_train, y_test = train_test_split(combine_features, y, test_size=0.2, random_state=42)
 
 # %%
 y_pred = model.predict(X_test)
@@ -101,4 +99,4 @@ plt.title("Predicted Emotion Distribution")
 plt.xticks(rotation=45)
 
 # %%
-df_sample.shape
+df.shape
