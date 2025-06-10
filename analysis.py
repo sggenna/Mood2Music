@@ -49,7 +49,7 @@ df = df[['text', 'Genre', 'Tempo', 'emotion']].dropna()
 df['vec'] = df['text'].apply(lambda doc: nlp(doc).vector)
 
 # %% [markdown]
-# Feature matrix with vectorized values
+# 2D Array with vectorized values
 
 # %%
 lyrics = np.array([np.array(vec) for vec in df['vec']])
